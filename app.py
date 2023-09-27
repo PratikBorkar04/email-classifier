@@ -8,7 +8,7 @@ from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
 ps = PorterStemmer()
 
-
+# Function to transform text
 def transform_text(text):
     text = text.lower()
     text = nltk.word_tokenize(text)
@@ -32,24 +32,33 @@ def transform_text(text):
         y.append(ps.stem(i))
 
     return " ".join(y)
-    
+
+# Load the model and vectorizer
 tfidf = pickle.load(open('vectorizer.pkl','rb'))
 model = pickle.load(open('AB-model.pkl','rb'))
 
-st.title("Email Classifier")
+# Set page title and header
+st.set_page_config(page_title="Spam Classifier", page_icon=":shield:", layout="centered")
 
-input_sms = st.text_area("Enter the message")
+# Create a header
+st.title("Email/SMS Spam Classifier")
 
+# Input for user text
+input_sms = st.text_area("Enter the message", "Type your message here...")
+
+# Predict button
 if st.button('Predict'):
-
-    # 1. preprocess
-    transformed_sms = transform_text(input_sms)
-    # 2. vectorize
-    vector_input = tfidf.transform([transformed_sms])
-    # 3. predict
-    result = model.predict(vector_input)[0]
-    # 4. Display
-    if result == 1:
-        st.header("Spam")
+    # Check if input is empty
+    if not input_sms.strip():
+        st.warning("Please enter a message for prediction.")
     else:
-        st.header("Not Spam")
+        # Preprocess and predict
+        transformed_sms = transform_text(input_sms)
+        vector_input = tfidf.transform([transformed_sms])
+        result = model.predict(vector_input)[0]
+
+        # Display result
+        if result == 1:
+            st.success("Prediction: Spam :warning:")
+        else:
+            st.success("Prediction: Not Spam :thumbsup:")
